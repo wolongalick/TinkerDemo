@@ -1,0 +1,65 @@
+apply plugin: 'com.android.application'
+
+apply from: 'tinkerpatch.gradle'
+
+android {
+    compileSdkVersion 28
+
+    signingConfigs {
+        config {
+            keyAlias 'bookStore'
+            keyPassword '123123'
+            storeFile file('../key/bookstore.jks')
+            storePassword '123123'
+        }
+    }
+
+
+    defaultConfig {
+        applicationId "com.alick.tinkerdemo"
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0.0"
+
+        buildConfigField "String", "MESSAGE", "\"I am the base apk\""
+//        buildConfigField "String", "MESSAGE", "\"I am the patch apk\""
+        /**
+         * client version would update with patch
+         * so we can get the newly git version easily!
+         */
+        buildConfigField "String", "TINKER_ID", "\"TINKER_ID_b168b32\""
+        buildConfigField "String", "PLATFORM", "\"all\""
+    }
+    buildTypes {
+        release {
+            debuggable false
+            jniDebuggable false
+            zipAlignEnabled true
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            debuggable true
+            jniDebuggable true
+            zipAlignEnabled false
+            shrinkResources false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+    annotationProcessor("com.tinkerpatch.tinker:tinker-android-anno:1.9.13.3")
+    // 若使用annotation需要单独引用,对于tinker的其他库都无需再引用
+    compileOnly("com.tinkerpatch.tinker:tinker-android-anno:1.9.13.3")
+    implementation("com.tinkerpatch.sdk:tinkerpatch-android-sdk:1.2.13.3")
+}
